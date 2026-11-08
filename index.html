@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>toybox</title>
+<style>
+  :root { --bg:#faf8f3; --fg:#222; --card:#fff; --muted:#888; --accent:#e4572e; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#16161a; --fg:#eee; --card:#24242a; --muted:#999; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg);
+         font-family: system-ui, "Hiragino Sans", "Noto Sans JP", sans-serif; }
+  header { padding:32px 16px 8px; max-width:960px; margin:auto; }
+  h1 { margin:0; font-size:2rem; }
+  h1 span { color:var(--accent); }
+  p.lead { color:var(--muted); margin:4px 0 0; }
+  main { max-width:960px; margin:auto; padding:16px;
+         display:grid; gap:16px; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); }
+  a.card { display:block; background:var(--card); border-radius:12px; overflow:hidden;
+           text-decoration:none; color:inherit; box-shadow:0 1px 3px rgba(0,0,0,.08);
+           transition:transform .15s; }
+  a.card:hover { transform:translateY(-3px); }
+  .thumb { aspect-ratio:16/10; background:#ddd center/cover no-repeat;
+           display:flex; align-items:center; justify-content:center; font-size:2.5rem; }
+  .body { padding:12px; }
+  .title { font-weight:700; }
+  .desc { color:var(--muted); font-size:.9rem; margin-top:4px; }
+  .date { color:var(--muted); font-size:.75rem; margin-top:8px; }
+  footer { text-align:center; color:var(--muted); font-size:.8rem; padding:32px 16px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>toy<span>box</span></h1>
+  <p class="lead">ブラウザで遊べる小さなゲームたち</p>
+</header>
+<main id="list"></main>
+<footer>by <a href="https://github.com/norif" style="color:inherit">norif</a></footer>
+<script>
+fetch('games.json')
+  .then(r => r.json())
+  .then(games => {
+    games.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    const list = document.getElementById('list');
+    for (const g of games) {
+      const a = document.createElement('a');
+      a.className = 'card';
+      a.href = `games/${g.id}/`;
+      const thumb = g.thumb
+        ? `<div class="thumb" style="background-image:url('games/${g.id}/${g.thumb}')"></div>`
+        : `<div class="thumb">${g.emoji || '🎲'}</div>`;
+      a.innerHTML = `${thumb}<div class="body">
+        <div class="title"></div><div class="desc"></div><div class="date"></div></div>`;
+      a.querySelector('.title').textContent = g.title;
+      a.querySelector('.desc').textContent = g.desc || '';
+      a.querySelector('.date').textContent = g.date || '';
+      list.appendChild(a);
+    }
+  })
+  .catch(() => {
+    document.getElementById('list').textContent = 'games.json を読み込めませんでした';
+  });
+</script>
+</body>
+</html>
